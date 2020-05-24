@@ -1,0 +1,29 @@
+{
+  "name": "ocelot-bot-v2",
+  "version": "2.0.0",
+  "description": "Discord bot",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "nodemon --inspect src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ha6000/Ocelot-Bot-V2.git"
+  },
+  "keywords": [
+    "bot",
+    "discord"
+  ],
+  "author": "Harry Kruger",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ha6000/Ocelot-Bot-V2/issues"
+  },
+  "homepage": "https://github.com/ha6000/Ocelot-Bot-V2#readme",
+  "dependencies": {
+    "discord.js": "^12.2.0",
+    "doblox": "^2.0.6",
+    "hastebin": "^0.2.1",
+    "noblox.js": "^4.5.6"
+  }
+}
