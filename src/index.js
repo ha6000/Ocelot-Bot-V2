@@ -20,6 +20,7 @@ var ready = new Promise((resolve, reject) => {
 });
 
 var logChannel;
+var server;
 
 function log(message) {
 	return ready
@@ -101,9 +102,18 @@ client.on('ready', () => {
 		}).setColor('RED');
 		logChannel.send(errorEmbed);
 	});
-	const server = client.guilds.cache.get(config.serverid);
+	server = client.guilds.cache.get(config.serverid);
 	checkMembers(server.members.cache);
 	setInterval(checkMembers.bind({}, server.members.cache), 5 * 60 * 1000);
+});
+
+client.on('message', message => {
+	if (message.author.bot) return;
+	if (message.content == '!refresh') {
+		if (!message.member.permissions.has('ADMINISTRATOR')) return message.channel.send('You do not have permissons');
+		checkMembers(server.members.cache);
+		message.channel.send('Checking for changes');
+	}
 });
 
 client.login(config.token);
