@@ -50,6 +50,10 @@ function checkMember(member) {
 		.then(roles => {
 			return dobloxClient.getRoleInGroup(member, config.groupid)
 				.then(rank => {
+					if (typeof rank != 'string') {
+						console.error(rank);
+						return;
+					}
 					const newRoles = member.roles.cache.filter(role => {
 						return role.name == rank || !roles.includes(role.name);
 					});
@@ -104,7 +108,7 @@ client.on('ready', () => {
 	});
 	server = client.guilds.cache.get(config.serverid);
 	checkMembers(server.members.cache);
-	setInterval(checkMembers.bind({}, server.members.cache), 5 * 60 * 1000);
+	setInterval(checkMembers.bind({}, server.members.cache), 15 * 60 * 1000);
 });
 
 client.on('message', message => {
