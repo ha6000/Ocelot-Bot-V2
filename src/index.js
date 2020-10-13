@@ -83,7 +83,7 @@ async function updateMember(roles, member) {
 	const acronym = nicknames[rank];
 
 	if (acronym) {
-		const nickname = `[${acronym}] ${player.name}`;
+		const nickname = `[${acronym}] ${player.username}`;
 
 		if (member.displayName != nickname) await member.setNickname(nickname).catch(() => {});
 	}
