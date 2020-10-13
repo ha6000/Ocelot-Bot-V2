@@ -31,20 +31,17 @@ function log(message) {
 }
 
 // Finds role by name and makes sure it exists.
-function getRole(name, roles) {
-	return Promise.resolve()
-		.then(() => {
-			var role = roles.cache.find(r => r.name == name);
-			if (role) {
-				return role;
-			} else {
-				log(new discord.MessageEmbed({
-					title: 'Creating role',
-					description: 'Role created named `' + name + '`'
-				}).setColor('PURPLE'));
-				return roles.create({data: {name}});
-			}
-		});
+async function getRole(name, roles) {
+	var role = roles.cache.find(r => r.name == name);
+	if (role) {
+		return role;
+	} else {
+		log(new discord.MessageEmbed({
+			title: 'Creating role',
+			description: 'Role created named `' + name + '`'
+		}).setColor('PURPLE'));
+		return roles.create({data: {name}});
+	}
 }
 
 async function updateMember(roles, member) {
@@ -101,7 +98,13 @@ async function updateMember(roles, member) {
 async function updateMembers(members) {
 	const roles = await noblox.getRoles(config.groupid).then(r => r.map(role => role.name));
 
-	return Promise.all(members.filter(m => !m.user.bot).map(m => updateMember(roles, m)));
+	members = members.filter(m => !m.user.bot).array();
+
+	for (var i = 0; i < members.length; i++) {
+		const member = members[i];
+
+		await updateMember(roles, member);
+	}
 }
 
 function error(err) {
