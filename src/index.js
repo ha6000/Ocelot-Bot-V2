@@ -8,10 +8,10 @@ const discord = require('discord.js');
 const client = new discord.Client();
 
 const noblox = require('noblox.js');
-const doblox = require('doblox');
-const dobloxClient = new doblox.Client(noblox, client);
-
-const roles = noblox.getRoles(config.groupid).then(r => r.map(role => role.name));
+const Doblox = require('doblox');
+const doblox = new Doblox.Client(noblox, client, {
+	provider: 'bloxlink'
+});
 
 var ready = new Promise((resolve, reject) => {
 	client.once('ready', () => {
@@ -22,6 +22,7 @@ var ready = new Promise((resolve, reject) => {
 var logChannel;
 var server;
 
+// sends message in log channel.
 function log(message) {
 	return ready
 	.then(() => {
@@ -29,6 +30,7 @@ function log(message) {
 	});
 }
 
+// Finds role by name and makes sure it exists.
 function getRole(name, roles) {
 	return Promise.resolve()
 		.then(() => {
@@ -45,79 +47,115 @@ function getRole(name, roles) {
 		});
 }
 
-function checkMember(member) {
-	return roles
-		.then(roles => {
-			return dobloxClient.getRoleInGroup(member, config.groupid)
-				.then(rank => {
-					if (typeof rank != 'string') {
-						console.error(rank);
-						return;
-					}
-					const newRoles = member.roles.cache.filter(role => {
-						return role.name == rank || !roles.includes(role.name);
-					});
-					if (newRoles.size != member.roles.cache.size || !newRoles.some(r => r.name == rank)) {
-						log(new discord.MessageEmbed({
-							title: 'Updating Roles',
-							description: `Updates roles for **${member.user.username}**`
-						}).setColor('BLUE'));
-						return getRole(rank, member.guild.roles)
-							.then(role => {
-								newRoles.set(role.id, role);
-								return member.roles.set(newRoles);
-							})
-					}
-				})
-				.catch(error => {
-					if (error.errno == 0) return undefined;
-					return Promise.reject(error)
-				});
-		});
+async function updateMember(roles, member) {
+	let player;
+
+	try {
+		player = await doblox.getRobloxUser(member);
+	}
+	catch(err) {
+		console.error(err);
+		return log(new discord.MessageEmbed({
+			title: 'User skipped',
+			description: `User was skipped because **${err.message}** error occured`
+		}).setColor('BLUE'));
+	}
+
+	if (!player) return log(new discord.MessageEmbed({
+		title: 'User skipped',
+		description: `User skipped that is not linked **${member.displayName}**`
+	}).setColor('BLUE'));
+
+	let rank;
+
+	try {
+		rank = await noblox.getRankNameInGroup(config.groupid, player.id)
+	}
+	catch(err) {
+		if (err.errno == 0) return;
+	}
+
+	if (typeof rank != 'string') {
+		console.error(rank);
+		return;
+	}
+
+	const newRoles = member.roles.cache.filter(role => {
+		return role.name == rank || !roles.includes(role.name);
+	});
+	if (newRoles.size != member.roles.cache.size || !newRoles.some(r => r.name == rank)) {
+
+		log(new discord.MessageEmbed({
+			title: 'Updating Roles',
+			description: `Updating roles for **${member.displayName}**`
+		}).setColor('BLUE'));
+
+		const role = await getRole(rank, member.guild.roles);
+
+		newRoles.set(role.id, role);
+		
+		return member.roles.set(newRoles);
+	}
 }
 
-function checkMembers(members) {
-	const accumalation = [];
-	members.each(member => accumalation.push(checkMember(member)));
-	return Promise.all(accumalation);
+async function updateMembers(members) {
+	const roles = await noblox.getRoles(config.groupid).then(r => r.map(role => role.name));
+
+	return Promise.all(members.filter(m => !m.user.bot).map(m => updateMember(roles, m)));
+}
+
+function error(err) {
+	const errorEmbed = new discord.MessageEmbed({
+		title: 'Error occured',
+		description: `**${err.message}**`
+	}).setColor('RED');
+
+	log(errorEmbed)
 }
 
 client.on('ready', () => {
 	console.log('Bot started');
+
 	logChannel = client.channels.cache.get(config.logchannel);
+
 	const startedEmbed = new discord.MessageEmbed({
 		title: `**${client.user.tag}** started`,
 		description: `_${os.hostname()} - ${os.platform()}_`
 	}).setColor('GREEN');
+
 	logChannel.send(startedEmbed);
+
 	process.on('unhandledRejection', (err) => {
 		process.emit('uncaughtExceptionMonitor', err, 'unhandledRejection');
 	});
 	process.on('uncaughtExceptionMonitor', async (err, origin) => {
 		console.error(err);
-		if (err.stack.length > 2000) {
-			var stack = await hastebin.createPaste(err.stack);
-		} else {
-			var stack = '```' + err.stack + '```';
-		}
-		const errorEmbed = new discord.MessageEmbed({
-			title: `**${err.name}**`,
-			description: stack
-		}).setColor('RED');
-		logChannel.send(errorEmbed);
+		error(err);
 	});
+
 	server = client.guilds.cache.get(config.serverid);
-	checkMembers(server.members.cache);
-	setInterval(checkMembers.bind({}, server.members.cache), 15 * 60 * 1000);
+
+	updateMembers(server.members.cache);
+
+	setInterval(updateMembers.bind({}, server.members.cache), config.interval || 15 * 60 * 1000);
 });
 
-client.on('message', message => {
+client.on('message', async (message) => {
 	if (message.author.bot) return;
 	if (message.content == '!refresh') {
 		if (!message.member.permissions.has('ADMINISTRATOR')) return message.channel.send('You do not have permissons');
-		checkMembers(server.members.cache);
-		message.channel.send('Checking for changes');
+		const alertMessage = await message.channel.send('Checking for changes');
+		try {
+			await updateMembers(server.members.cache);
+		}
+		catch(err) {
+			console.error(err);
+			alertMessage.edit('Failed checking for changes');
+		}
+
+		alertMessage.edit('Succesfully updated roles');
 	}
 });
 
 client.login(config.token);
+noblox.setCookie(config.cookie);

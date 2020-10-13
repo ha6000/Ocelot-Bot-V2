@@ -2,5 +2,6 @@
 	"token": "", // token of the discord bot
 	"cookie": "", // roblox cookie
 	"serverid": "", // intended server to update roles in
-	"groupid": ""// the roblox group id of the group to update roles
+	"groupid": ""// the roblox group id of the group to update roles,
+	"interval": 1200000 // the interval at which to update at
 }
