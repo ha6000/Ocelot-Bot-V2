@@ -57,7 +57,7 @@ async function updateMember(roles, member) {
 		console.error(err);
 		return log(new discord.MessageEmbed({
 			title: 'User skipped',
-			description: `User was skipped because **${err.message}** error occured`
+			description: `**${member.user.displayName}** was skipped because **${err.message}** error occured`
 		}).setColor('BLUE'));
 	}
 
