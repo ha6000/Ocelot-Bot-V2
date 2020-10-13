@@ -22,7 +22,7 @@
   "homepage": "https://github.com/ha6000/Ocelot-Bot-V2#readme",
   "dependencies": {
     "discord.js": "^12.3.1",
-    "doblox": "^4.0.8",
+    "doblox": "^4.2.2",
     "hastebin": "^0.2.1",
     "noblox.js": "^4.7.3"
   }

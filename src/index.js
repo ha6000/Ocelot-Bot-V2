@@ -1,4 +1,5 @@
 const config = require('../config.json');
+const nicknames = require('../nicknames.json');
 
 const os = require('os');
 
@@ -48,7 +49,9 @@ async function updateMember(roles, member) {
 	let player;
 
 	try {
-		player = await doblox.getRobloxUser(member);
+		player = await doblox.getRobloxUser(member, false, {
+			guild: true
+		});
 	}
 	catch(err) {
 		console.error(err);
@@ -75,6 +78,14 @@ async function updateMember(roles, member) {
 	if (typeof rank != 'string') {
 		console.error(rank);
 		return;
+	}
+
+	const acronym = nicknames[rank];
+
+	if (acronym) {
+		const nickname = `[${acronym}] ${member.user.username}`;
+
+		if (member.displayName != nickname) await member.setNickname(nickname).catch(() => {});
 	}
 
 	const newRoles = member.roles.cache.filter(role => {

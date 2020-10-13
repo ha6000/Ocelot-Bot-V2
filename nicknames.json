@@ -1,0 +1,23 @@
+{
+	"Recruit": "R",
+	"Private": "P",
+	"Private First Class": "PFC",
+	"Corporal": "C",
+	"Specialist": "SP",
+	"Sergeant": "SG",
+	"Staff Sergeant": "SSG",
+	"Sergeant First Class": "SFC",
+	"Master Sergeant": "MS",
+	"First Sergeant": "FS",
+	"Sergeant Major": "SM",
+	"Command Sergeant Major": "CSM",
+	"2nd Lieutenant": "2L",
+	"1st Lieutenant": "1L",
+	"Captain": "CPT",
+	"Honorary Major": "HM",
+	"Commander": "COM",
+	"Allied Diplomat": "AD",
+	"Developer": "DEV",
+	"Foreign Affairs Manager": "FAM",
+	"2nd Command": "2C"
+}
