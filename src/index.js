@@ -85,7 +85,13 @@ async function updateMember(roles, member) {
 	if (acronym) {
 		const nickname = `[${acronym}] ${player.username}`;
 
-		if (member.displayName != nickname) await member.setNickname(nickname).catch(() => {});
+		if (member.displayName != nickname) {
+			await member.setNickname(nickname).catch(() => {});
+			log(new MessageEmbed({
+				title: 'Updated nickname',
+				description: `Updated **${member.user.username}** nickname`
+			}).setColor('BLUE'));
+		}
 	}
 
 	const newRoles = member.roles.cache.filter(role => {
