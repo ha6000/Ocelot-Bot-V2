@@ -57,14 +57,14 @@ async function updateMember(roles, member) {
 		console.error(err);
 		return log(new discord.MessageEmbed({
 			title: 'User skipped',
-			description: `**${member.displayName}** was skipped because **${err.message}** error occured`
+			description: `**${member.displayName}** was skipped because **${err.message || err.name}** error occured`
 		}).setColor('BLUE'));
 	}
 
-	if (!player) return log(new discord.MessageEmbed({
+	if (!player) return; /*log(new discord.MessageEmbed({
 		title: 'User skipped',
 		description: `User skipped that is not linked **${member.displayName}**`
-	}).setColor('BLUE'));
+	}).setColor('BLUE'));*/
 
 	let rank;
 
