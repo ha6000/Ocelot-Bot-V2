@@ -87,7 +87,7 @@ async function updateMember(roles, member) {
 
 		if (member.displayName != nickname) {
 			await member.setNickname(nickname).catch(() => {});
-			log(new MessageEmbed({
+			log(new discord.MessageEmbed({
 				title: 'Updated nickname',
 				description: `Updated **${member.user.username}** nickname`
 			}).setColor('BLUE'));
